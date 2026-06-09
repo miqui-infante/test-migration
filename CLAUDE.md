@@ -135,10 +135,10 @@ output/{nombre-script}.md
 └── CLAUDE.md         # Este documento
 ```
 
-## Fase II: Compilación de Proyectos MIR
+## Fase I: Descarga y Checkeo de Ramas de Proyectos MIR
 
 ### Objetivo
-Comprobar la compilación de los proyectos de tipología MIR (workflows Mirinda) que pertenezcan a casos de uso activos.
+Descargar los proyectos de tipología MIR (workflows Mirinda) que pertenezcan a casos de uso activos, comprobar su rama por defecto, y generar un csv y un breve reporte.
 
 ### Proceso de Filtrado
 A partir del archivo `deprecation.csv`, se aplicarán los siguientes filtros en orden:
@@ -156,9 +156,80 @@ Para cada proyecto que pase los filtros:
 
 1. Limpiar carpeta `./tmp/{nombre-repo}` si existe
 2. Clonar el repositorio en `./tmp/{nombre-repo}`
-3. Compilar con `./gradlew bottle`
-4. Registrar el resultado (éxito/fallo)
-5. Si falla, capturar el mensaje de error
+3. Leer la current branch (que será la default branch del repo)
+
+### Salidas
+
+#### 1. Fichero CSV: uc-mir-active.csv
+Se generará un archivo CSV con las columnas:
+- `name`: Nombre del repositorio
+- `default_branch`: Rama por defecto del repositorio
+
+#### 2. Reporte: output/fase1.md
+
+Se generará un archivo `output/fase1.md` con la siguiente estructura:
+
+```markdown
+# Descarga y Checkeo de Ramas - Proyectos MIR
+
+## Resumen Ejecutivo
+- Total de proyectos: P
+- Total de proyectos de Casos de Uso: U
+- Total de proyectos MIR en uc: X
+- Proyectos activos (no deprecated): Y
+
+## Distribución por Rama por Defecto
+- Proyectos con default branch "master": N
+- Proyectos con default branch "develop": M
+- Proyectos con default branch "main": L
+- ...
+
+## Listado de Repositorios
+- nombre-repo-1 (master)
+- nombre-repo-2 (develop)
+- ...
+```
+
+### Resultado Esperado
+Un informe completo del estado de las ramas por defecto de todos los proyectos MIR activos de casos de uso, junto con un archivo CSV para su posterior procesamiento.
+
+1. **Fichero CSV**: `uc-mir-active.csv`
+   - Listado completo con nombre y rama por defecto
+   - Formato listo para procesamiento automatizado
+
+2. **Reporte final**: `output/fase1.md`
+   - Resumen ejecutivo con estadísticas
+   - Distribución por tipo de rama por defecto
+   - Listado completo de repositorios
+
+3. **Log de ejecución**: `logs/fase1-{YYYYMMDD-HHmmss}.txt`
+   - Contiene toda la salida del script
+   - Persiste aunque se interrumpa la ejecución
+
+## Fase II: Compilación de Proyectos MIR
+
+### Objetivo
+Comprobar la compilación de los proyectos de tipología MIR (workflows Mirinda) que pertenezcan a casos de uso activos.
+
+### Entrada de Datos
+Esta fase utiliza como entrada el archivo CSV generado por la **Fase I**:
+```
+uc-mir-active.csv
+```
+
+Este archivo contiene el listado de proyectos MIR activos de casos de uso ya filtrados, con las columnas:
+- `name`: Nombre del repositorio
+- `default_branch`: Rama por defecto del repositorio
+
+### Flujo de Ejecución
+Para cada proyecto del archivo `uc-mir-active.csv`:
+
+1. Verificar si el repositorio ya existe en `./tmp/{nombre-repo}`
+   - Si **no existe**: Clonar el repositorio en `./tmp/{nombre-repo}`
+   - Si **ya existe**: Reutilizar el repositorio clonado (por ejemplo, de la Fase I)
+2. Compilar con `./gradlew bottle`
+3. Registrar el resultado (éxito/fallo)
+4. Si falla, capturar el mensaje de error
 
 ### Reporte: output/fase2.md
 
@@ -168,10 +239,7 @@ Se generará un archivo `output/fase2.md` con la siguiente estructura:
 # Compilación proyectos MIR
 
 ## Resumen Ejecutivo
-- Total de proyectos: P
-- Total de proyectos de Casos de Uso: U
-- Total de proyectos MIR en uc: X
-- Proyectos activos (no deprecated): Y
+- Total de proyectos MIR activos en uc (no deprecated): Y
 - Proyectos que compilan correctamente: Z
 - Tasa de éxito: Z/Y (XX%)
 

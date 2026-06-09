@@ -1,7 +1,8 @@
 #!/usr/bin/env python3
 """
 Script para la Fase II: Compilación de proyectos MIR
-Filtra y compila proyectos de tipología MIR activos de casos de uso.
+Compila proyectos de tipología MIR activos de casos de uso.
+Lee el listado de repositorios desde uc-mir-active.csv (generado por Fase I).
 """
 
 import csv
@@ -11,7 +12,7 @@ import shutil
 import sys
 from pathlib import Path
 from dataclasses import dataclass
-from typing import List, Tuple
+from typing import List
 from datetime import datetime
 
 @dataclass
@@ -59,59 +60,36 @@ class Logger:
 class MirProjectCompiler:
     """Clase para compilar proyectos MIR"""
 
-    DEPRECATION_FILE = "/Users/miqui/git/masorange/deprecation.csv"
+    UC_MIR_ACTIVE_FILE = "uc-mir-active.csv"
     TMP_DIR = "./tmp"
     GITHUB_ORG = "masorange"
 
     def __init__(self, logger: Logger):
         self.logger = logger
-        self.total_projects = 0
-        self.uc_projects = 0
-        self.mir_projects = 0
         self.active_mir_projects = 0
         self.results: List[CompilationResult] = []
 
-    def read_repositories(self) -> List[Tuple[str, str]]:
-        """Lee el archivo deprecation.csv y devuelve lista de (nombre, estado)"""
+    def read_repositories(self) -> List[str]:
+        """Lee el archivo uc-mir-active.csv y devuelve lista de nombres de repositorios"""
         repos = []
-        with open(self.DEPRECATION_FILE, 'r') as f:
-            reader = csv.reader(f)
+        with open(self.UC_MIR_ACTIVE_FILE, 'r') as f:
+            reader = csv.DictReader(f)
             for row in reader:
-                if row and row[0]:  # Ignorar líneas vacías
-                    repo_name = row[0]
-                    status = row[1] if len(row) > 1 else ""
-                    repos.append((repo_name, status))
+                if row and row.get('name'):  # Ignorar líneas vacías
+                    repos.append(row['name'])
+
+        self.active_mir_projects = len(repos)
         return repos
 
-    def filter_repositories(self, repos: List[Tuple[str, str]]) -> List[str]:
-        """
-        Aplica los filtros para obtener proyectos MIR activos de casos de uso.
-        Retorna lista de nombres de repositorios filtrados.
-        """
-        self.total_projects = len(repos)
-
-        # Filtro 1: Solo casos de uso (gea-uc-*)
-        uc_repos = [(name, status) for name, status in repos if name.startswith("gea-uc-")]
-        self.uc_projects = len(uc_repos)
-
-        # Filtro 2: Solo tipología MIR (gea-uc-mir-*)
-        mir_repos = [(name, status) for name, status in uc_repos if name.startswith("gea-uc-mir-")]
-        self.mir_projects = len(mir_repos)
-
-        # Filtro 3: Excluir deprecated
-        active_mir = [name for name, status in mir_repos if status != "deprecated"]
-        self.active_mir_projects = len(active_mir)
-
-        return active_mir
-
     def clone_repository(self, repo_name: str) -> bool:
-        """Clona un repositorio en ./tmp/{repo_name}"""
+        """Clona un repositorio en ./tmp/{repo_name} si no existe ya"""
         repo_url = f"https://github.com/{self.GITHUB_ORG}/{repo_name}"
         target_path = os.path.join(self.TMP_DIR, repo_name)
 
-        # Si ya existe, lo eliminamos primero
+        # Si ya existe, reutilizarlo
         if os.path.exists(target_path):
-            shutil.rmtree(target_path)
+            self.logger.print(f"Repositorio {repo_name} ya existe, reutilizando...")
+            return True
 
         # Crear directorio tmp si no existe
         os.makedirs(self.TMP_DIR, exist_ok=True)
@@ -200,10 +178,7 @@ class MirProjectCompiler:
 
         # Resumen Ejecutivo
         report += "## Resumen Ejecutivo\n"
-        report += f"- Total de proyectos: {self.total_projects}\n"
-        report += f"- Total de proyectos de Casos de Uso: {self.uc_projects}\n"
-        report += f"- Total de proyectos MIR en uc: {self.mir_projects}\n"
-        report += f"- Proyectos activos (no deprecated): {self.active_mir_projects}\n"
+        report += f"- Total de proyectos MIR activos en uc (no deprecated): {self.active_mir_projects}\n"
         report += f"- Proyectos que compilan correctamente: {len(successful)}\n"
         report += f"- Tasa de éxito: {len(successful)}/{self.active_mir_projects} ({success_rate:.1f}%)\n\n"
 
@@ -234,12 +209,9 @@ class MirProjectCompiler:
         self.logger.print("=" * 60)
         self.logger.print()
 
-        # Leer y filtrar repositorios
-        self.logger.print("1. Leyendo repositorios...")
-        repos = self.read_repositories()
-
-        self.logger.print("2. Aplicando filtros...")
-        mir_repos = self.filter_repositories(repos)
+        # Leer repositorios desde uc-mir-active.csv
+        self.logger.print("1. Leyendo repositorios desde uc-mir-active.csv...")
+        mir_repos = self.read_repositories()
 
         self.logger.print(f"\nRepositorios a procesar: {len(mir_repos)}")
         self.logger.print()

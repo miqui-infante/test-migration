@@ -17,6 +17,8 @@ Realizar pruebas de compilación y validación de repositorios de la organizaci�
 ```
 test-migration/
 ├── src/              # Scripts de procesamiento
+├── logs/             # Logs de ejecución (auto-generada)
+├── output/           # Reportes markdown (auto-generada)
 ├── tmp/              # Repositorios clonados (temporal)
 ├── CLAUDE.md         # Instrucciones detalladas del proyecto
 └── README.md         # Este archivo
@@ -45,6 +47,42 @@ Donde `estado` puede ser vacío (`""`) para repositorios activos o `"deprecated"
 
 ## Scripts Disponibles
 
+### Fase I: Descarga y Checkeo de Ramas de Proyectos MIR
+
+**Archivos:**
+- `src/fase1.py` - Script principal en Python
+- `src/fase1.sh` - Wrapper Bash para ejecutar el script
+
+**Objetivo:**
+Descargar los proyectos de tipología MIR (workflows Mirinda) que pertenezcan a casos de uso activos, comprobar su rama por defecto, y generar un csv y un breve reporte.
+
+**Proceso:**
+1. Lee el archivo `deprecation.csv`
+2. Filtra repositorios con el patrón `gea-uc-mir-*`
+3. Excluye repositorios marcados como `deprecated`
+4. Clona cada repositorio en `./tmp/`
+5. Identifica la rama por defecto de cada repositorio
+6. Genera un CSV y un reporte detallado
+
+**Uso:**
+
+```bash
+./src/fase1.sh
+```
+
+**Salidas:**
+- **CSV generado**: `uc-mir-active.csv`
+  - Columnas: `name`, `default_branch`
+  - Listado de todos los proyectos MIR activos con su rama por defecto
+
+- **Reporte generado**: `output/fase1.md`
+  - Resumen ejecutivo con estadísticas
+  - Distribución por tipo de rama por defecto (master, develop, main, etc.)
+  - Listado completo de repositorios
+
+- **Log de ejecución**: `logs/fase1-{YYYYMMDD-HHmmss}.txt`
+  - Registro completo de la ejecución del script
+
 ### Fase II: Compilación de Proyectos MIR
 
 **Archivos:**
@@ -54,13 +92,16 @@ Donde `estado` puede ser vacío (`""`) para repositorios activos o `"deprecated"
 **Objetivo:**
 Compilar todos los proyectos de tipología MIR (workflows Mirinda) activos de casos de uso para verificar su estado de compilación.
 
+**Entrada:**
+Esta fase utiliza como entrada el archivo CSV generado por la **Fase I**: `uc-mir-active.csv`
+
 **Proceso:**
-1. Lee el archivo `deprecation.csv`
-2. Filtra repositorios con el patrón `gea-uc-mir-*`
-3. Excluye repositorios marcados como `deprecated`
-4. Clona cada repositorio en `./tmp/`
-5. Ejecuta `./gradlew bottle` para compilar
-6. Genera un reporte detallado en `fase2.md`
+1. Lee el archivo `uc-mir-active.csv`
+2. Verifica si cada repositorio ya está clonado en `./tmp/`
+   - Si no existe, lo clona
+   - Si ya existe (por ejemplo, de la Fase I), lo reutiliza
+3. Ejecuta `./gradlew bottle` para compilar
+4. Genera un reporte detallado
 
 **Uso:**
 
@@ -68,12 +109,15 @@ Compilar todos los proyectos de tipología MIR (workflows Mirinda) activos de ca
 ./src/fase2.sh
 ```
 
-**Salida:**
-- Reporte generado: `fase2.md`
-- Incluye:
+**Salidas:**
+- **Reporte generado**: `output/fase2.md`
   - Resumen ejecutivo con estadísticas
+  - Tasa de éxito de compilación
   - Lista de proyectos que no compilan
   - Detalle de errores de compilación
+
+- **Log de ejecución**: `logs/fase2-{YYYYMMDD-HHmmss}.txt`
+  - Registro completo de la ejecución del script
 
 ## Notas
 
