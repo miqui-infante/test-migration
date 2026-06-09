@@ -1,6 +1,6 @@
 #!/usr/bin/env python3
 """
-Script para la Fase I: Compilación de proyectos MIR
+Script para la Fase II: Compilación de proyectos MIR
 Filtra y compila proyectos de tipología MIR activos de casos de uso.
 """
 
@@ -34,7 +34,7 @@ class Logger:
 
         # Generar nombre de archivo con timestamp
         timestamp = datetime.now().strftime("%Y%m%d-%H%M%S")
-        log_filename = f"logs/fase1-{timestamp}.txt"
+        log_filename = f"logs/fase2-{timestamp}.txt"
 
         # Abrir archivo en modo append
         self.log_file = open(log_filename, "w", encoding="utf-8")
@@ -190,7 +190,7 @@ class MirProjectCompiler:
         return self.compile_project(repo_name)
 
     def generate_report(self) -> str:
-        """Genera el contenido del reporte fase1.md"""
+        """Genera el contenido del reporte fase2.md"""
         successful = [r for r in self.results if r.success]
         failed = [r for r in self.results if not r.success]
 
@@ -228,9 +228,9 @@ class MirProjectCompiler:
         return report
 
     def run(self):
-        """Ejecuta el proceso completo de la Fase I"""
+        """Ejecuta el proceso completo de la Fase II"""
         self.logger.print("=" * 60)
-        self.logger.print("FASE I: Compilación de proyectos MIR")
+        self.logger.print("FASE II: Compilación de proyectos MIR")
         self.logger.print("=" * 60)
         self.logger.print()
 
@@ -259,8 +259,8 @@ class MirProjectCompiler:
         # Crear carpeta output si no existe
         os.makedirs("output", exist_ok=True)
 
-        # Guardar reporte en output/fase1.md
-        output_file = "output/fase1.md"
+        # Guardar reporte en output/fase2.md
+        output_file = "output/fase2.md"
         with open(output_file, "w") as f:
             f.write(report_content)
 

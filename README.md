@@ -45,11 +45,11 @@ Donde `estado` puede ser vacío (`""`) para repositorios activos o `"deprecated"
 
 ## Scripts Disponibles
 
-### Fase I: Compilación de Proyectos MIR
+### Fase II: Compilación de Proyectos MIR
 
 **Archivos:**
-- `src/fase1.py` - Script principal en Python
-- `src/fase1.sh` - Wrapper Bash para ejecutar el script
+- `src/fase2.py` - Script principal en Python
+- `src/fase2.sh` - Wrapper Bash para ejecutar el script
 
 **Objetivo:**
 Compilar todos los proyectos de tipología MIR (workflows Mirinda) activos de casos de uso para verificar su estado de compilación.
@@ -60,16 +60,16 @@ Compilar todos los proyectos de tipología MIR (workflows Mirinda) activos de ca
 3. Excluye repositorios marcados como `deprecated`
 4. Clona cada repositorio en `./tmp/`
 5. Ejecuta `./gradlew bottle` para compilar
-6. Genera un reporte detallado en `fase1.md`
+6. Genera un reporte detallado en `fase2.md`
 
 **Uso:**
 
 ```bash
-./src/fase1.sh
+./src/fase2.sh
 ```
 
 **Salida:**
-- Reporte generado: `fase1.md`
+- Reporte generado: `fase2.md`
 - Incluye:
   - Resumen ejecutivo con estadísticas
   - Lista de proyectos que no compilan

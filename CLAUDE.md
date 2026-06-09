@@ -135,7 +135,7 @@ output/{nombre-script}.md
 └── CLAUDE.md         # Este documento
 ```
 
-## Fase I: Compilación de Proyectos MIR
+## Fase II: Compilación de Proyectos MIR
 
 ### Objetivo
 Comprobar la compilación de los proyectos de tipología MIR (workflows Mirinda) que pertenezcan a casos de uso activos.
@@ -160,9 +160,9 @@ Para cada proyecto que pase los filtros:
 4. Registrar el resultado (éxito/fallo)
 5. Si falla, capturar el mensaje de error
 
-### Reporte: output/fase1.md
+### Reporte: output/fase2.md
 
-Se generará un archivo `output/fase1.md` con la siguiente estructura:
+Se generará un archivo `output/fase2.md` con la siguiente estructura:
 
 ```markdown
 # Compilación proyectos MIR
@@ -196,12 +196,12 @@ Se generará un archivo `output/fase1.md` con la siguiente estructura:
 Un informe completo del estado de compilación de todos los proyectos MIR activos de casos de uso,
 identificando aquellos que requieren corrección antes de la migración al monorepo, y el fichero de log.
 
-1. **Reporte final**: `output/fase1.md`
+1. **Reporte final**: `output/fase2.md`
 - Resumen ejecutivo con estadísticas
 - Lista de proyectos que no compilan
 - Detalle de errores de compilación
 
-2.  **Log de ejecución**: `logs/fase1-{YYYYMMDD-HHmmss}.txt`
+2.  **Log de ejecución**: `logs/fase2-{YYYYMMDD-HHmmss}.txt`
 - Contiene toda la salida del script
 - Persiste aunque se interrumpa la ejecución
 
